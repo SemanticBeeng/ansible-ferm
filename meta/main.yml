@@ -15,4 +15,4 @@ galaxy_info:
     - system
 
 dependencies:
-  - src: https://github.com/devops-works/ansible-sysctl
+  - src: semanticbeeng.ansible_sysctl #todo need this hack
