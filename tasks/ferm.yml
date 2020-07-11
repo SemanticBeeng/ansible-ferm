@@ -15,6 +15,7 @@
     mode: 2750
   with_items:
     - '/etc/ferm/ferm.d'
+    - '/etc/ferm/incl.d'
     - '/etc/ferm/filter-input.d'
   tags:
   - skip_ansible_lint
@@ -46,41 +47,50 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
-- name: Configure forwarding in ip(6)tables if enabled
+- name: Configure black and white listing
   template:
-    src: '10_forward.conf.j2'
-    dest: '/etc/ferm/ferm.d/10_forward.conf'
+    src: 'bw_list.conf.j2'
+    dest: '/etc/ferm/incl.d/bw_list.conf'
     owner: 'root'
     group: 'adm'
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
-- name: Remove ip(6)tables rules if requested
-  file:
-    path: '/etc/ferm/ferm.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
-    state: 'absent'
-  with_flattened:
-    - "{{ ferm_rules }}"
-    - "{{ ferm_group_rules }}"
-    - "{{ ferm_host_rules }}"
-    - "{{ ferm_dependent_rules }}"
-  when: ((item.type is defined and item.type) and
-         (item.delete is defined and item.delete | bool))
-
-- name: Configure ip(6)tables rules
-  template:
-    src: 'input.d/{{ item.type }}.conf.j2'
-    dest: '/etc/ferm/ferm.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
-    owner: 'root'
-    group: 'adm'
-    mode: '0644'
-  with_flattened:
-    - "{{ ferm_rules }}"
-    - "{{ ferm_group_rules }}"
-    - "{{ ferm_host_rules }}"
-    - "{{ ferm_dependent_rules }}"
-  when: ((item.type is defined and item.type) and
-         (item.delete is undefined or not item.delete | bool))
+#- name: Configure forwarding in ip(6)tables if enabled
+#  template:
+#    src: '10_forward.conf.nu.j2'
+#    dest: '/etc/ferm/ferm.d/10_forward.conf'
+#    owner: 'root'
+#    group: 'adm'
+#    mode: '0644'
+#  notify: [ 'Restart ferm' ]
+#
+#- name: Remove ip(6)tables rules if requested
+#  file:
+#    path: '/etc/ferm/ferm.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
+#    state: 'absent'
+#  with_flattened:
+#    - "{{ ferm_rules }}"
+#    - "{{ ferm_group_rules }}"
+#    - "{{ ferm_host_rules }}"
+#    - "{{ ferm_dependent_rules }}"
+#  when: ((item.type is defined and item.type) and
+#         (item.delete is defined and item.delete | bool))
+#
+#- name: Configure ip(6)tables rules
+#  template:
+#    src: 'input.d/{{ item.type }}.conf.j2'
+#    dest: '/etc/ferm/ferm.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
+#    owner: 'root'
+#    group: 'adm'
+#    mode: '0644'
+#  with_flattened:
+#    - "{{ ferm_rules }}"
+#    - "{{ ferm_group_rules }}"
+#    - "{{ ferm_host_rules }}"
+#    - "{{ ferm_dependent_rules }}"
+#  when: ((item.type is defined and item.type) and
+#         (item.delete is undefined or not item.delete | bool))
 
 - name: Remove iptables INPUT rules if requested
   file:

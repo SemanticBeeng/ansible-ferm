@@ -1,0 +1,69 @@
+{% if ferm_auto_whitelist %}
+# Auto whitelisting
+{%   set friends = [] -%}
+{%-  for node in groups.all %}
+# {{ node }}
+{%    if 'ansible_all_ipv4_addresses' in hostvars[node] %}
+{%-      for iface in hostvars[node].ansible_all_ipv4_addresses %}
+{%-        set _ = friends.append(iface) -%}
+{%       endfor -%}
+{%     endif -%}
+{%   endfor %}
+
+@def $auto_whitelist = ({{ friends | sort | unique | join(" ") }});
+{% endif %}
+
+{% if ferm_whitelist %}
+{%   set friends = [] -%}
+{%-  for ip in ferm_whitelist %}
+{%-    set _ = friends.append(ip) -%}
+{%   endfor -%}
+
+@def $whitelist = ({{ friends | sort | unique | join(" ") }});
+{% endif %}
+
+{% if ferm_blacklist %}
+{%   set foes = [] -%}
+{%-  for ip in ferm_blacklist %}
+{%-    set _ = foes.append(ip) -%}
+{%   endfor -%}
+
+@def $blacklist = ({{ foes | sort | unique | join(" ") }});
+{% endif %}
+
+{% if ferm_auto_whitelist %}
+  chain INPUT {
+    protocol tcp syn @subchain "AUTO_WHITELIST" {
+      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;
+    }
+    protocol udp @subchain "AUTO_WHITELIST" {
+      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;
+    }
+    protocol icmp @subchain "AUTO_WHITELIST" {
+      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;
+    }
+  }
+{% endif %}
+
+{% if ferm_whitelist %}
+  chain INPUT {
+    protocol tcp syn @subchain "WHITELIST" {
+      saddr ( @ipfilter( $whitelist ) ) ACCEPT;
+    }
+  }
+{% endif %}
+
+{% if ferm_blacklist %}
+  chain INPUT {
+    protocol tcp syn @subchain "BLACKLIST" {
+      saddr ( @ipfilter( $blacklist ) ) {
+{%   if ferm_log_issues is defined and ferm_log_issues %}
+        mod limit limit 3/hour limit-burst 5 {
+          LOG log-prefix "iptables-BLACKLIST: ";
+        }
+{%   endif %}
+        REJECT;
+      }
+    }
+  }
+{% endif %}
