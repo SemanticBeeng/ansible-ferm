@@ -86,7 +86,7 @@ domain $domains table filter {
     # Allow all loopback (lo) traffic and reject traffic
     # to localhost that does not originate from lo.
     interface lo ACCEPT;
-    interface ! lo saddr 127.0.0.0/8 REJECT;
+    # interface ! lo saddr 127.0.0.0/8 REJECT;
 
 {% if ferm_icmp_limit is defined and ferm_icmp_limit %}
     # Limit incoming ICMP traffic per source
