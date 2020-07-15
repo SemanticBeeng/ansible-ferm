@@ -1,8 +1,12 @@
 
         chain INPUT interface $intf_main {
-            proto tcp dport ssh ACCEPT;
+            daddr $ipv4_address {
+                proto tcp dport ssh mod state state (NEW ESTABLISHED) ACCEPT;
+            }
         }
 
         chain OUTPUT outerface $intf_main {
-            proto tcp sport ssh ACCEPT;
+            saddr $ipv4_address {
+                proto tcp sport ssh mod state state (ESTABLISHED) ACCEPT;
+            }
         }

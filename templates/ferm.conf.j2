@@ -23,40 +23,9 @@
 @def $domains   = ({{ ferm_filter_domains | unique | join(" ") }});
 @def $ipv4_enabled  = {% if 'ip'  in ferm_filter_domains %}1{% else %}0{% endif %};
 @def $ipv6_enabled  = {% if 'ip6' in ferm_filter_domains %}1{% else %}0{% endif %};
-#@def $intf_main = eno2;
 
-{#{% if ferm_auto_whitelist %}#}
-{## Auto whitelisting#}
-{#{%   set friends = [] -%}#}
-{#{%-  for node in groups.all %}#}
-{## {{ node }} #}
-{#{%    if 'ansible_all_ipv4_addresses' in hostvars[node] %}#}
-{#{%-      for iface in hostvars[node].ansible_all_ipv4_addresses %}#}
-{#{%-        set _ = friends.append(iface) -%}#}
-{#{%       endfor -%}#}
-{#{%     endif -%}#}
-{#{%   endfor %}#}
-{##}
-{#@def $auto_whitelist = ({{ friends | sort | unique | join(" ") }});#}
-{#{% endif %}#}
-{##}
-{#{% if ferm_whitelist %}#}
-{#{%   set friends = [] -%}#}
-{#{%-  for ip in ferm_whitelist %}#}
-{#{%-    set _ = friends.append(ip) -%}#}
-{#{%   endfor -%}#}
-{##}
-{#@def $whitelist = ({{ friends | sort | unique | join(" ") }});#}
-{#{% endif %}#}
-{##}
-{#{% if ferm_blacklist %}#}
-{#{%   set foes = [] -%}#}
-{#{%-  for ip in ferm_blacklist %}#}
-{#{%-    set _ = foes.append(ip) -%}#}
-{#{%   endfor -%}#}
-{##}
-{#@def $blacklist = ({{ foes | sort | unique | join(" ") }});#}
-{#{% endif %}#}
+@def $ipv4_address  = {{ ansible_default_ipv4.address }};
+@def $intf_main     = {{ intf_main }};
 
 {#{% if ferm_docker %}#}
 {#domain $domains table nat {#}
@@ -127,42 +96,6 @@ domain $domains table filter {
   }
 
   @include 'incl.d/bw_list.conf';
-{#{% if ferm_auto_whitelist %}#}
-{#  chain INPUT {#}
-{#    protocol tcp syn @subchain "AUTO_WHITELIST" {#}
-{#      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;#}
-{#    }#}
-{#    protocol udp @subchain "AUTO_WHITELIST" {#}
-{#      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;#}
-{#    }#}
-{#    protocol icmp @subchain "AUTO_WHITELIST" {#}
-{#      saddr ( @ipfilter( $auto_whitelist ) ) ACCEPT;#}
-{#    }#}
-{#  }#}
-{#{% endif %}#}
-{##}
-{#{% if ferm_whitelist %}#}
-{#  chain INPUT {#}
-{#    protocol tcp syn @subchain "WHITELIST" {#}
-{#      saddr ( @ipfilter( $whitelist ) ) ACCEPT;#}
-{#    }#}
-{#  }#}
-{#{% endif %}#}
-{##}
-{#{% if ferm_blacklist %}#}
-{#  chain INPUT {#}
-{#    protocol tcp syn @subchain "BLACKLIST" {#}
-{#      saddr ( @ipfilter( $blacklist ) ) {#}
-{#{%   if ferm_log_issues is defined and ferm_log_issues %}#}
-{#        mod limit limit 3/hour limit-burst 5 {#}
-{#          LOG log-prefix "iptables-BLACKLIST: ";#}
-{#        }#}
-{#{%   endif %}#}
-{#        REJECT;#}
-{#      }#}
-{#    }#}
-{#  }#}
-{#{% endif %}#}
 
 {% if ferm_syn_limit is defined and ferm_syn_limit %}
   chain INPUT {

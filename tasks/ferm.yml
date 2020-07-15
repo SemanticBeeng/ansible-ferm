@@ -138,8 +138,7 @@
 #         (item.delete is undefined or not item.delete | bool))
 
 - name: Apply iptables rules if ferm is enabled
-  command: ferm --slow --def '$intf_main=eno2' --def '$ipv4_address={{ansible_default_ipv4.address}}'  /etc/ferm/ferm.conf
- #command: ferm --slow --def '$ipv4_address=172.17.0.2'                       --def '$intf_main=eth0' /etc/ferm/ferm.conf
+  command: ferm --slow /etc/ferm/ferm.conf
   changed_when: False
   when: ferm_enabled
 

@@ -1,13 +1,15 @@
 
-    # Allow DNS resolution and limited HTTP/S on eth0.
-    #domain (ip) {
+        # Allow DNS resolution and limited HTTP/S on eth0.
         chain INPUT interface $intf_main {
-            proto (tcp udp) sport 53 mod state state ESTABLISHED ACCEPT;
+            daddr $ipv4_address {
+                proto (tcp udp) sport 53 mod state state ESTABLISHED ACCEPT;
+            }
         }
         chain OUTPUT outerface $intf_main {
-            proto (tcp udp) dport 53 mod state state (NEW ESTABLISHED) ACCEPT;
+            saddr $ipv4_address {
+                proto (tcp udp) dport 53 mod state state (NEW ESTABLISHED) ACCEPT;
+            }
         }
-    #}
 
 {## Allow DNS resolution and limited HTTP/S on eth0.#}
 {## Necessary for updating the server and keeping time.#}
