@@ -1,0 +1,15 @@
+# table filter {
+
+    # Allow all loopback (lo) traffic and reject traffic
+    # to localhost that does not originate from lo.
+    # https://www.linode.com/docs/networking/vpn/tunnel-your-internet-traffic-through-an-openvpn-server/
+
+    chain INPUT {
+        interface lo ACCEPT;
+        interface ! lo saddr 127.0.0.0/8 REJECT;
+    }
+
+    chain OUTPUT {
+        outerface lo ACCEPT;
+    }
+# }

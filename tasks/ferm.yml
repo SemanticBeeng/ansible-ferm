@@ -38,6 +38,15 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
+- name: Allow loopback traffic
+  template:
+    src: 'input.d/000_lo.conf.j2'
+    dest: '/etc/ferm/filter-input.d/000_lo.conf'
+    owner: 'root'
+    group: 'adm'
+    mode: '0644'
+  notify: [ 'Restart ferm' ]
+
 - name: Allow SSH access
   template:
     src: 'input.d/001_sshd.conf.j2'
@@ -59,7 +68,7 @@
 - name: Allow HTTP/S traffic
   template:
     src: 'input.d/005_http.conf.j2'
-    dest: '/etc/ferm/filter-input.d/002_dns.conf'
+    dest: '/etc/ferm/filter-input.d/005_dns.conf'
     owner: 'root'
     group: 'adm'
     mode: '0644'

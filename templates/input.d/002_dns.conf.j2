@@ -5,12 +5,14 @@
     chain INPUT interface $intf_main {
         daddr $ipv4_address {
             proto (tcp udp) sport 53 mod state state ESTABLISHED ACCEPT;
+            proto icmp icmp-type echo-request ACCEPT;
         }
     }
 
     chain OUTPUT outerface $intf_main {
         saddr $ipv4_address {
             proto (tcp udp) dport 53 mod state state (NEW ESTABLISHED) ACCEPT;
+            proto icmp icmp-type echo-request ACCEPT;
         }
     }
 # }
