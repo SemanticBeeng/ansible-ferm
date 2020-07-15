@@ -74,15 +74,6 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
-#- name: Copying default FW rules
-#  template:
-#    src:  'ferm_rules/ipv4/999_default_fw.conf'
-#    dest: '/etc/ferm/ferm.d/999_default_fw.conf'
-#    owner: root
-#    group: root
-#  tags:
-#     always
-
 - name: Configure black and white listing
   template:
     src: 'bw_list.conf.j2'
@@ -91,6 +82,15 @@
     group: 'adm'
     mode: '0644'
   notify: [ 'Restart ferm' ]
+
+- name: Copying default log & reject rules
+  template:
+    src:  'input.d/999_default_logreject.conf.j2'
+    dest: '/etc/ferm/ferm.d/999_default_logreject.conf'
+    owner: root
+    group: root
+  tags:
+     always
 
 #- name: Configure forwarding in ip(6)tables if enabled
 #  template:

@@ -1,0 +1,30 @@
+# table filter {
+
+    # Log any packets which don't fit the rules above... and reject them
+    # (optional but useful)
+    # https://www.linode.com/docs/networking/vpn/tunnel-your-internet-traffic-through-an-openvpn-server/
+
+    chain INPUT {
+
+      mod limit limit 3/min {
+        LOG log-prefix "iptables_INPUT_denied: " log-level 4;
+      }
+      REJECT;
+    }
+
+    chain FORWARD {
+
+      mod limit limit 3/min {
+        LOG log-prefix "iptables_FORWARD_denied: " log-level 4;
+      }
+      REJECT;
+    }
+
+    chain OUTPUT {
+
+      mod limit limit 3/min {
+        LOG log-prefix "iptables_OUTPUT_denied: " log-level 4;
+      }
+      REJECT;
+    }
+# }
