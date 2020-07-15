@@ -1,0 +1,32 @@
+# table filter {
+
+    # Allow OpenVPN UDP traffic on port 1194
+    # https://www.linode.com/docs/networking/vpn/tunnel-your-internet-traffic-through-an-openvpn-server/
+
+    chain INPUT {
+        interface $intf_main daddr $ipv4_address {
+            proto udp dport 1194 mod state state (NEW ESTABLISHED) ACCEPT;
+        }
+
+        interface tun0 ACCEPT;
+    }
+
+    chain OUTPUT {
+        outerface $intf_main saddr $ipv4_address {
+            proto udp sport 1194 mod state state (ESTABLISHED) ACCEPT;
+        }
+
+        outerface tun0 ACCEPT;
+    }
+
+    chain FORWARD {
+        interface tun0 ACCEPT;
+
+        # Allow forwarding traffic only from the VPN.
+        outerface $intf_main daddr $ipv4_address {
+            interface tun0 saddr 10.8.0.1/24 ACCEPT;    # #todo {{ vpn_interface }}
+        }
+
+        mod state state (ESTABLISHED RELATED) ACCEPT;
+    }
+# }

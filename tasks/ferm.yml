@@ -65,6 +65,15 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
+- name: Allow OpenVPN traffic
+  template:
+    src: 'input.d/003_openvpn.conf.j2'
+    dest: '/etc/ferm/filter-input.d/003_openvpn.conf'
+    owner: 'root'
+    group: 'adm'
+    mode: '0644'
+  notify: [ 'Restart ferm' ]
+
 - name: Allow HTTP/S traffic
   template:
     src: 'input.d/005_http.conf.j2'
