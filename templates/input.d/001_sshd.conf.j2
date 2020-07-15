@@ -1,0 +1,14 @@
+
+    #@def $TRUSTED_HOSTS = (ferm_ansible_controllers);
+
+    #domain (ip) {
+        chain INPUT interface $intf_main {
+            # saddr @ipfilter($TRUSTED_HOSTS);
+            proto tcp dport ssh ACCEPT;
+        }
+
+        chain OUTPUT outerface $intf_main {
+            # saddr @ipfilter($TRUSTED_HOSTS) ;
+            proto tcp sport ssh ACCEPT;
+        }
+    #}

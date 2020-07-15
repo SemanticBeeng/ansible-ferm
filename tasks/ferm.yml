@@ -38,14 +38,32 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
-- name: Allow SSH access from Ansible Controller
+- name: Allow SSH access
   template:
-    src: 'input.d/ansible_controller.conf.j2'
-    dest: '/etc/ferm/filter-input.d/10_ansible_controller.conf'
+    src: 'input.d/001_sshd.conf.j2'
+    dest: '/etc/ferm/filter-input.d/001_sshd.conf'
     owner: 'root'
     group: 'adm'
     mode: '0644'
   notify: [ 'Restart ferm' ]
+
+- name: Allow DNS resolution
+  template:
+    src: 'input.d/002_dns.conf.j2'
+    dest: '/etc/ferm/filter-input.d/002_dns.conf'
+    owner: 'root'
+    group: 'adm'
+    mode: '0644'
+  notify: [ 'Restart ferm' ]
+
+#- name: Copying default FW rules
+#  template:
+#    src:  'ferm_rules/ipv4/999_default_fw.conf'
+#    dest: '/etc/ferm/ferm.d/999_default_fw.conf'
+#    owner: root
+#    group: root
+#  tags:
+#     always
 
 - name: Configure black and white listing
   template:
@@ -92,36 +110,38 @@
 #  when: ((item.type is defined and item.type) and
 #         (item.delete is undefined or not item.delete | bool))
 
-- name: Remove iptables INPUT rules if requested
-  file:
-    path: '/etc/ferm/filter-input.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
-    state: 'absent'
-  with_flattened:
-    - "{{ ferm_input_list }}"
-    - "{{ ferm_input_group_list }}"
-    - "{{ ferm_input_host_list }}"
-    - "{{ ferm_input_dependent_list }}"
-  when: ((item.type is defined and item.type) and
-         (item.delete is defined and item.delete | bool))
-
-- name: Configure iptables INPUT rules
-  template:
-    src: 'input.d/{{ item.type }}.conf.j2'
-    dest: '/etc/ferm/filter-input.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
-    owner: 'root'
-    group: 'adm'
-    mode: '0644'
-  with_flattened:
-    - "{{ ferm_input_list }}"
-    - "{{ ferm_input_group_list }}"
-    - "{{ ferm_input_host_list }}"
-    - "{{ ferm_input_dependent_list }}"
-  when: ((item.type is defined and item.type) and
-         (item.delete is undefined or not item.delete | bool))
+#- name: Remove iptables INPUT rules if requested
+#  file:
+#    path: '/etc/ferm/filter-input.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
+#    state: 'absent'
+#  with_flattened:
+#    - "{{ ferm_input_list }}"
+#    - "{{ ferm_input_group_list }}"
+#    - "{{ ferm_input_host_list }}"
+#    - "{{ ferm_input_dependent_list }}"
+#  when: ((item.type is defined and item.type) and
+#         (item.delete is defined and item.delete | bool))
+#
+#- name: Configure iptables INPUT rules
+#  template:
+#    src: 'input.d/{{ item.type }}.conf.j2'
+#    dest: '/etc/ferm/filter-input.d/{{ item.weight | default("50") }}_{{ item.filename | default(item.type + "_" + item.name | default((item.dport[0] if item.dport|d() else "rules"))) }}.conf'
+#    owner: 'root'
+#    group: 'adm'
+#    mode: '0644'
+#  with_flattened:
+#    - "{{ ferm_input_list }}"
+#    - "{{ ferm_input_group_list }}"
+#    - "{{ ferm_input_host_list }}"
+#    - "{{ ferm_input_dependent_list }}"
+#  when: ((item.type is defined and item.type) and
+#         (item.delete is undefined or not item.delete | bool))
 
 - name: Apply iptables rules if ferm is enabled
-  command: ferm --slow /etc/ferm/ferm.conf
+  command: ferm --slow --def '$ipv4_address={{ansible_default_ipv4.address}}' --def '$intf_main=eno2' /etc/ferm/ferm.conf
+ #command: ferm --slow --def '$ipv4_address=172.17.0.2'               --def '$intf_main=eth0' /etc/ferm/ferm.conf
   changed_when: False
+  when: ferm_enabled
 
 - name: Clear iptables rules if ferm is disabled
   command: ferm --flush /etc/ferm/ferm.conf

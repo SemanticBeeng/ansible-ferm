@@ -23,6 +23,7 @@
 @def $domains   = ({{ ferm_filter_domains | unique | join(" ") }});
 @def $ipv4_enabled  = {% if 'ip'  in ferm_filter_domains %}1{% else %}0{% endif %};
 @def $ipv6_enabled  = {% if 'ip6' in ferm_filter_domains %}1{% else %}0{% endif %};
+#@def $intf_main = eno2;
 
 {#{% if ferm_auto_whitelist %}#}
 {## Auto whitelisting#}
