@@ -56,6 +56,15 @@
     mode: '0644'
   notify: [ 'Restart ferm' ]
 
+- name: Allow HTTP/S traffic
+  template:
+    src: 'input.d/005_http.conf.j2'
+    dest: '/etc/ferm/filter-input.d/002_dns.conf'
+    owner: 'root'
+    group: 'adm'
+    mode: '0644'
+  notify: [ 'Restart ferm' ]
+
 #- name: Copying default FW rules
 #  template:
 #    src:  'ferm_rules/ipv4/999_default_fw.conf'

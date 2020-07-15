@@ -1,12 +1,17 @@
+# table filter {
 
-        chain INPUT interface $intf_main {
-            daddr $ipv4_address {
-                proto tcp dport ssh mod state state (NEW ESTABLISHED) ACCEPT;
-            }
-        }
+    # Allow SSH access in and out.
+    # https://www.linode.com/docs/networking/vpn/tunnel-your-internet-traffic-through-an-openvpn-server/
 
-        chain OUTPUT outerface $intf_main {
-            saddr $ipv4_address {
-                proto tcp sport ssh mod state state (ESTABLISHED) ACCEPT;
-            }
+    chain INPUT interface $intf_main {
+        daddr $ipv4_address {
+            proto tcp dport ssh mod state state (NEW ESTABLISHED) ACCEPT;
         }
+    }
+
+    chain OUTPUT outerface $intf_main {
+        saddr $ipv4_address {
+            proto tcp sport ssh mod state state (ESTABLISHED) ACCEPT;
+        }
+    }
+# }
