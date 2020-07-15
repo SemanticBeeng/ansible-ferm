@@ -53,7 +53,7 @@ domain $domains table filter {
 
   chain INPUT {
 
-    @include 'filter-input.d/000_lo.conf';
+    # @include 'filter-input.d/000_lo.conf';
 
 {% if ferm_icmp_limit is defined and ferm_icmp_limit %}
     # Limit incoming ICMP traffic per source
